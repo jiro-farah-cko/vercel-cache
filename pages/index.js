@@ -9,10 +9,10 @@ export default function Home({ currentDateTime }) {
   );
 }
 
-export async function getStaticProps(context) {
+export async function getStaticProps() {
   const currentDateTime = new Date().toISOString();
-  const targetMinDateTime = "2021-08-05T11:00:14.645Z";
-  const targetMaxDateTime = "2021-08-05T11:05:14.645Z";
+  const targetMinDateTime = "2021-08-05T11:25:14.645Z";
+  const targetMaxDateTime = "2021-08-05T11:30:14.645Z";
 
   console.log(`Current Date time: ${currentDateTime}`);
   console.log(`Current Target min Date time: ${targetMinDateTime}`);
@@ -26,9 +26,10 @@ export async function getStaticProps(context) {
       props: {
         currentDateTime,
       },
-      revalidate: 30,
+      revalidate: 1,
     };
   }
+
   return {
     notFound: true,
   };
