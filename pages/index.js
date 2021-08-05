@@ -1,35 +1,75 @@
-import styles from "../styles/Home.module.css";
+import Head from "next/head";
+import {
+  getBannerCovidAPI,
+  getHomepageAPI,
+  getFooterAPI,
+  getMenuAPI,
+} from "./api";
+import Error from "./_error";
+import { isValidFooterResponse } from "../dataValidators";
+import Hero from "../components/HomepageHero";
+import Footer from "../components/Footer";
+import HomepageLayout from "../components/HomepageLayout";
 
-export default function Home({ currentDateTime }) {
+/* this is the '/' - homepage basically */
+/* were using content={} for the data passed in all the components */
+
+const Home = (props) => {
+  const { homepageHero, currentTime, statusCode, noContent, footerData } =
+    props;
+
+  if (statusCode || noContent) {
+    return <Error statusCode={statusCode} />;
+  }
+
   return (
-    <div className={styles.container}>
-      <h2>{currentDateTime}</h2>
-    </div>
+    <>
+      <Head>
+        <title>Vercel cache test</title>
+      </Head>
+      <HomepageLayout>
+        <h2>{currentTime}</h2>
+        {homepageHero?.length > 0 && <Hero />}
+
+        {footerData && <Footer dataFooter={footerData || {}} />}
+      </HomepageLayout>
+    </>
   );
-}
+};
 
-export async function getStaticProps() {
-  const currentDateTime = new Date().toISOString();
-  const targetMinDateTime = "2021-08-05T11:35:14.645Z";
-  const targetMaxDateTime = "2021-08-05T11:45:14.645Z";
+export async function getStaticProps(context) {
+  const footerData = await getFooterAPI();
+  const response = await getHomepageAPI();
 
-  console.log(`Current Date time: ${currentDateTime}`);
-  console.log(`Current Target min Date time: ${targetMinDateTime}`);
-  console.log(`Current Target max Date time: ${targetMaxDateTime}`);
+  const currentTime = new Date().toISOString();
+  const menuData = await getMenuAPI(currentTime);
+  console.log(currentTime);
 
-  if (
-    currentDateTime > targetMaxDateTime ||
-    currentDateTime < targetMinDateTime
-  ) {
+  if (!response || !isValidFooterResponse(footerData) || !menuData) {
+    context.statusCode = 404;
+
     return {
-      props: {
-        currentDateTime,
-      },
-      revalidate: 1,
+      notFound: true,
     };
   }
 
+  const data = response.data || null;
+  const homepageHero = data?.homepage_hero || null;
+
+  const noContent = data?.body?.length === 0;
+
   return {
-    notFound: true,
+    props: {
+      data: response?.data || null,
+      homepageHero,
+      menuData: menuData?.data || null,
+      footerData: footerData?.data || null,
+      noContent,
+      id: response?.id || null,
+      currentTime,
+    },
+    revalidate: 1,
   };
 }
+
+export default Home;
