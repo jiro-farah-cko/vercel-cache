@@ -13,8 +13,8 @@ export const getFooterAPI = () => {
 };
 
 export const getMenuAPI = (time) => {
-  const targetMinTime = "2021-08-05T13:30:45.432Z";
-  const targetMaxTime = "2021-08-05T13:33:45.432Z";
+  const targetMinTime = "2021-08-08T09:58:33.739Z";
+  const targetMaxTime = "2021-08-08T10:00:33.739Z";
   if (time < targetMinTime || time > targetMaxTime) {
     return data.menuData;
   }
